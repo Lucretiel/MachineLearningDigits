@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bash --init-file resource/init_shell.init
