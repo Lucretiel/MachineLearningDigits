@@ -4,8 +4,7 @@ option --charset, which is a string that specifies what character to use for
 a given intensity level (from the first character at -1 to the last at 1)
 '''
 
-from common import PixelData, NUM_COLUMNS, message_reader, autoexec
-from digits_pb2 import Digit
+from common import NUM_COLUMNS, message_reader, autoexec
 import argparse
 
 def scale(input_min, input_max, output_min, output_max):
@@ -24,7 +23,7 @@ PARSER = argparse.ArgumentParser('render')
 PARSER.add_argument('--charset', '-c', default=" .:-=+*#%@")
 
 @autoexec(__name__, PARSER)
-@message_reader(Digit)
+@message_reader
 def render(digits, charset):
     '''
     Render the given digits to the command line, using the charset
@@ -43,21 +42,10 @@ def render(digits, charset):
         return charset[int(charset_scale(value))]
 
     for digit in digits:
-        print "Numeral: {}".format(digit.numeral)
-
-        #Load data
-        data = PixelData(digit.data)
+        print("Numeral: {}".format(digit.numeral))
 
         #Print numeral
-        print template.format('\n'.join(
+        print(template.format('\n'.join(
             '|{}|'.format(''.join(get_char(pixel)
                 for pixel in row))
-            for row in data.rows()), horiz=horiz)
-
-        # print hoirz
-        # for row in data.rows():
-        #     print '|',
-        #     for pixel in row:
-        #         print get_char(pixel),
-        #     print '|'
-        # print horiz
+            for row in digit.rows)))

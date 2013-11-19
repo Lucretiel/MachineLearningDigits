@@ -1,4 +1,0 @@
-export PROJECT_ROOT="$( realpath . )"
-export PATH="${PROJECT_ROOT}/bin:${PATH}"
-export PROJECT_SRC="${PROJECT_ROOT}/src"
-export PYTHONPATH="${PROJECT_SRC}:${PYTHONPATH}"

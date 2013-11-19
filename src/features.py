@@ -4,7 +4,9 @@ use in other modules. It also contains the standard features, though others can
 be added
 '''
 
-all_features = {} # pylint: disable=C0103
+from functools import reduce
+from function_registry import FunctionRegistry
+all_features = FunctionRegistry()
 
 def register_feature(name=None):
     '''
@@ -22,24 +24,20 @@ def register_feature(name=None):
         return func
     return decorator
 
-@register_feature()
+@all_features.register
 def intensity(digit):
     '''
     Find the overall intensity of a given digit
     '''
-    return sum(d+1 for d in digit)
+    return sum(pixel+1 for pixel in digit)
 
-@register_feature()
+@all_features.register
 def symmetry(digit):
     '''
     Find the symmetry of a given digit
     '''
     def diffs():
-        '''
-        Find the diffs of the digit- difference between each pixel and its
-        mirror
-        '''
-        for row in digit.rows():
+        for row in digit.rows:
             for pixel, opposite in zip(row, reversed(row)):
                 yield abs(pixel - opposite)
     return -sum(diffs())
@@ -48,17 +46,14 @@ def minmax(data):
     '''
     Find the minimum and maximum of a given iterable
     '''
-    iter_data = iter(data)
-    initial_minmax = (next(iter_data),) * 2
     def check_minmax(current, check):
         '''
         Reduction to find the overall minmax
         '''
-        return (min(current[0], check),
-            max(current[1], check))
-    return reduce(check_minmax, iter_data, initial_minmax)
+        return min(current[0], check[0]), max(current[1], check[1])
+    return reduce(check_minmax, zip(data, data))
 
-@register_feature()
+@all_features.register
 def horizontal_sweep(digit):
     '''
     Find the difference between the leftmost and rightmost center, where a
@@ -68,7 +63,7 @@ def horizontal_sweep(digit):
         '''
         Find the individual centers.
         '''
-        for row in digit.rows():
+        for row in digit.rows:
             row_weight = sum(p+1 for p in row)
             row_total = sum(c * (pixel+1) for c, pixel in enumerate(row))
             if row_total == 0:
@@ -78,7 +73,7 @@ def horizontal_sweep(digit):
     min_row, max_row = minmax(centers())
     return max_row - min_row
 
-@register_feature()
+@all_features.register
 def vertical_uniformity(digit):
     '''
     Find the sum total of the differences in range of each column
@@ -87,7 +82,7 @@ def vertical_uniformity(digit):
         '''
         Find the range differnece for a given column
         '''
-        for column in digit.columns():
+        for column in digit.columns:
             min_value, max_value = minmax(column)
             yield max_value - min_value
     return 32 - sum(column_spans())
